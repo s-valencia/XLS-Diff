@@ -1,8 +1,9 @@
 # XLS Diff Reports - DRAFT
 # Description: This script is designed to take two Excel files as input, 
-#               create a duplicate of the first file with updated headers, 
-#               highlight differences between the two files, 
-#               and send an email with the differences file as an attachment.
+#              create a duplicate of the first file with updated headers, 
+#              highlight differences between the two files, 
+#              store it in a sheet and be able to repeat the process several times, 
+#              and send an email with the xlsx differences file as an attachment with a summary.
 
 import pandas as pd
 from openpyxl import load_workbook
@@ -12,17 +13,16 @@ def main():
     ## Step 1: Take in two different Excel files
     excel_before_path = 'PGE_Report_Field_Maps before - Copy.xlsx'
     excel_after_path = 'PGE_Report_Field_Maps after - Copy.xlsx'
+    # excel_before_path = input('Enter the first excel file: ')
+    # excel_after_path = input('Enter the second excel file: ')
 
     excel_before = pd.read_excel(excel_before_path)
     excel_after = pd.read_excel(excel_after_path)
 
-
     ## Step 2: Create a duplicate of “excel_before” and modify headers
     excel_differences_report = excel_before.copy()
     excluded_headers = ["Service Item ID", "Service Item ArcGIS Online URL", "Item Type"]
-    og_headers = [col for col in excel_differences_report.columns if col not in excluded_headers]
-    after_headers = [f"{col} (after)" for col in og_headers]
-
+    # excluded_headers = input("Enter the headers to exclude when comparing excel files (comma-separated): ").split(", ")
 
     ## Step 3: Add a blank column after every header
     new_columns = []
@@ -40,7 +40,6 @@ def main():
     
     excel_differences_report = new_df
 
-
     ## Step 4: Create a duplicate of “excel_after” and modify headers
     excel_after2 = excel_after.copy()
     after_headers = {
@@ -54,14 +53,12 @@ def main():
         if column in excel_differences_report.columns:
             excel_differences_report[column] = excel_after2[column]
 
-
     ## Step 6: Move excluded headers to the first three columns
     ordered_columns = excluded_headers + [col for col in excel_differences_report.columns if col not in excluded_headers]
     excel_differences_report = excel_differences_report[ordered_columns]
     
-    
     ## Step 7: Analyze for differences and highlight in Excel
-    output_file = "XLS Differences Report (test).xlsx"
+    output_file = input("Enter the output file name: ") + ".xlsx"
     excel_differences_report.to_excel(output_file, index=False, engine='openpyxl')
     wb = load_workbook(output_file)
     sheet = wb.active
@@ -72,28 +69,51 @@ def main():
     # Start checking from columns 4 and 5, then every two columns after that
     col_index = 4
 
-    while True:
-        col1 = sheet.cell(row=1, column=col_index).column_letter
-        col2 = sheet.cell(row=1, column=col_index + 1).column_letter
+    while col_index <= sheet.max_column:
+        col1 = col_index
+        col2 = col_index + 1
 
         # Break the loop if either header is blank
-        if sheet[f"{col1}1"].value is None or sheet[f"{col2}1"].value is None:
+        if sheet.cell(row=1, column=col1).value is None or sheet.cell(row=1, column=col2).value is None:
             break
 
         for row in range(2, sheet.max_row + 1):  # Assuming the first row is headers
-            value1 = sheet[f"{col1}{row}"].value
-            value2 = sheet[f"{col2}{row}"].value
+            value1 = sheet.cell(row=row, column=col1).value
+            value2 = sheet.cell(row=row, column=col2).value
 
             if value1 != value2:  # Highlight mismatched cells
-                sheet[f"{col1}{row}"].fill = highlight_fill
-                sheet[f"{col2}{row}"].fill = highlight_fill
+                sheet.cell(row=row, column=col1).fill = highlight_fill
+                sheet.cell(row=row, column=col2).fill = highlight_fill
 
         col_index += 2
+    
+    ## Step 8: Delete all rows with no differences
+    rows_to_delete = []
+    no_difference_rows = 0
 
+    for row in range(2, sheet.max_row + 1):
+        differences_found = False
+        for col in range(4, sheet.max_column + 1, 2):
+            value1 = sheet.cell(row=row, column=col).value
+            value2 = sheet.cell(row=row, column=col + 1).value
+            if value1 != value2:
+                differences_found = True
+                break
+        if not differences_found:
+            rows_to_delete.append(row)
+            no_difference_rows += 1
+
+    for row in reversed(rows_to_delete):
+        sheet.delete_rows(row)
+
+    ## Step 9: Rename the sheet based on user input
+    new_sheet_name = input("Enter the new sheet name: ")
+    sheet.title = new_sheet_name
+        
     # Save the updated workbook
     wb.save(output_file)
-
-    ## Step 8: Print a brief summary and bullet points of differences found
+    
+    ## Step 10: Print a brief summary and bullet points of differences found
     differences = []
     for col in excel_differences_report.columns:
         if col.endswith(" (after)"):
@@ -102,13 +122,14 @@ def main():
             if diff_count > 0:
                 differences.append(f"'{before_col}': {diff_count} differences found.")
 
-    # Summarize the differences in a professional manner
     if differences:
-        print("Summary of Differences: ")
-        print("\n")
+        print(f"Summary of Differences for '{new_sheet_name}': ")
         print("\n".join([f"- {diff}" for diff in differences]))
     else:
-        print("No differences were found between the two Excel files.")
+        print(f"No differences were found between the two Excel files for '{new_sheet_name}'.")
+
+    print(f"\nSummary of Deleted Rows for '{new_sheet_name}': ")
+    print(f"- {no_difference_rows} rows with no differences were deleted.")
 
 if __name__ == "__main__":
     main()
