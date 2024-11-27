@@ -61,7 +61,6 @@ def rerun(new_file):
     ordered_columns = valid_exclude_headers + [col for col in excel_report.columns if col not in valid_exclude_headers]
     excel_report = excel_report[ordered_columns]
 
-    ## Checkpoint: Data to the new sheet
     with pd.ExcelWriter(new_file, engine='openpyxl', mode='a') as writer:
         excel_report.to_excel(writer, sheet_name=new_sheet_name, index=False)
     
@@ -255,7 +254,7 @@ print(f"- {no_difference_rows} row(s) with no differences were deleted.")
 
 
 while True:
-    rerun_choice = input("Would you like to compare 2 new excel files? ").lower()
+    rerun_choice = input("Would you like to compare two new excel files? ").lower()
     if rerun_choice in ['y', 'yes']:
         rerun(output_file)
     else:
