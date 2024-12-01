@@ -15,18 +15,20 @@ def rerun(new_file):
     # wb.save(new_file)
     
     ## Step 1: Take in two different Excel files
-    xlsx_before_path = 'before - Test 2.xlsx'
-    xlsx_after_path = 'after - Test 2.xlsx'
-    # excel_before_path = input('Enter the first excel file: ') + ".xlsx"
-    # excel_after_path = input('Enter the second excel file: ') + ".xlsx"
+    xlsx_before_path = input('Enter the next before excel file: ')
+    if not xlsx_before_path.endswith('.xlsx'):
+        xlsx_before_path += ".xlsx"
+
+    xlsx_after_path = input('Enter the next after excel file: ')
+    if not xlsx_after_path.endswith('.xlsx'):
+        xlsx_after_path += ".xlsx"
 
     excel_before = pd.read_excel(xlsx_before_path)
     excel_after = pd.read_excel(xlsx_after_path)
 
     ## Step 2: Create a duplicate of “excel_before” and modify headers
     excel_report = excel_before.copy()
-    exclude_headers = ["Service Item ID", "Service Item ArcGIS Online URL", "Item Type"]
-    # excluded_headers = input("Enter the headers to exclude when comparing excel files (comma-separated): ").split(", ")
+    exclude_headers = input("Enter all headers that are excluded when comparing excel files (comma-separated): ").split(", ")
     
     ## Step 3: Add a blank column after every header in before excel
     new_columns = []
@@ -121,7 +123,7 @@ def rerun(new_file):
 
     if differences:
         print ("\n")
-        print(f"Key differences for '{new_sheet_name}': ")
+        print(f"Key differences found in '{new_sheet_name}': ")
         print("\n".join([f"- {diff}" for diff in differences]))
     else:
         print ("\n")
@@ -131,20 +133,24 @@ def rerun(new_file):
     print(f"- {no_difference_rows} row(s) with no differences were deleted.")
 
 #################################################################################
-output_file = input("Enter the output file name: ") + ".xlsx"  # Output file name
+output_file = input("Enter the excel file name: ") + ".xlsx"  # Output file name
+
 ## Step 1: Take in two different Excel files
-excel_before_path = 'PGE_Report_Field_Maps before - Copy.xlsx'
-excel_after_path = 'PGE_Report_Field_Maps after - Copy.xlsx'
-# excel_before_path = input('Enter the first excel file: ') + ".xlsx"
-# excel_after_path = input('Enter the second excel file: ') + ".xlsx"
+excel_before_path = input('Enter the before excel file: ')
+if not excel_before_path.endswith('.xlsx'):
+    excel_before_path += ".xlsx"
+
+excel_after_path = input('Enter the after excel file: ')
+if not excel_after_path.endswith('.xlsx'):
+    excel_after_path += ".xlsx"
 
 excel_before = pd.read_excel(excel_before_path)
 excel_after = pd.read_excel(excel_after_path)
 
 ## Step 2: Create a duplicate of “excel_before” and modify headers
 excel_differences_report = excel_before.copy()
-excluded_headers = ["Service Item ID", "Service Item ArcGIS Online URL", "Item Type"]
-# excluded_headers = input("Enter the headers to exclude when comparing excel files (comma-separated): ").split(", ")
+# Headers example: Service Item ID, Service Item ArcGIS Online URL, Item Type
+excluded_headers = input("Enter the headers to exclude when comparing excel files (comma-separated): ").split(", ")
 
 ## Step 3: Add a blank column after every header
 new_columns = []
@@ -244,7 +250,7 @@ for col in excel_differences_report.columns:
             differences.append(f"'{before_col}': {diff_count} differences found.")
 
 if differences:
-    print(f"Key differences for '{new_sheet_name}': ")
+    print(f"Key differences found in '{new_sheet_name}': ")
     print("\n".join([f"- {diff}" for diff in differences]))
 else:
     print(f"No differences were found.")
