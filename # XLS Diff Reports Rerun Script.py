@@ -28,7 +28,7 @@ def rerun(new_file):
 
     ## Step 2: Create a duplicate of “excel_before” and modify headers
     excel_report = excel_before.copy()
-    exclude_headers = input("Enter all headers that are excluded when comparing excel files (comma-separated): ").split(", ")
+    exclude_headers = ["Service Item ID", "Service Item ArcGIS Online URL", "Item Type"]
     
     ## Step 3: Add a blank column after every header in before excel
     new_columns = []
@@ -149,8 +149,7 @@ excel_after = pd.read_excel(excel_after_path)
 
 ## Step 2: Create a duplicate of “excel_before” and modify headers
 excel_differences_report = excel_before.copy()
-# Headers example: Service Item ID, Service Item ArcGIS Online URL, Item Type
-excluded_headers = input("Enter the headers to exclude when comparing excel files (comma-separated): ").split(", ")
+excluded_headers = ["Service Item ID", "Service Item ArcGIS Online URL", "Item Type"]
 
 ## Step 3: Add a blank column after every header
 new_columns = []
