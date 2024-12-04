@@ -164,6 +164,8 @@ def main ():
       sum_deletion2 = str(no_difference_rows) + " row(s) with no differences were deleted."
       final_sum.append(sum_deletion)
       final_sum.append(sum_deletion2)
+
+# Run the main function
 main()
 
 # Reruns the script using two new excel files
@@ -302,6 +304,7 @@ def rerun(new_file):
         final_sum.append(sum_deletion2)
 
 # Send email with the difference report
+# The summary of the differences is embedded in body of the email
 def send_email():
     msg = MIMEMultipart()
     msg.attach(MIMEText(combine_sum(), 'plain'))
@@ -329,6 +332,5 @@ while True:
     if rerun_choice in ['y', 'yes']:
         rerun(output_file)
     else:
-       print(combine_sum())
        send_email()
        break
